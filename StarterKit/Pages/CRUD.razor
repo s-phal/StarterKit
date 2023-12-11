@@ -1,0 +1,89 @@
+﻿@page "/crud";
+@using CodeCloner.Application.DataAccess
+@using StarterKit.Application.Models;
+
+
+<h3>Todo</h3>
+
+
+
+<input placeholder="Create a task..." @bind="todoTitle" />
+<input placeholder="Task details" @bind="todoDetails" />
+
+<button @onclick="CreateTodo">Create</button>
+
+
+<ul style="margin-top:75px">
+    @if (todos == null)
+    {
+        <li>Loading...</li>
+    }
+    else
+    {
+        @foreach (var todo in todos)
+        {
+            <li style="margin-bottom:10px">
+                <input @bind="todo.title" />
+                <input type="checkbox" @bind="todo.is_active">
+                <button class="btn btn-sm btn-info text-white" @onclick="() => UpdateTodo(todo)">Update</button>
+                <button class="btn btn-sm btn-danger" @onclick="() => DeleteTodo(todo.todo_id)">Delete</button>            
+            </li>
+        }        
+    }
+</ul>
+
+
+
+
+@code {
+
+    
+    List<Todo> todos = new();
+
+    string? todoTitle;
+    string? todoDetails;
+    string? todoUpdateTitle;
+    int todoId;
+
+
+    protected override void OnInitialized()
+    {
+        TodoDAO todoDAO = new TodoDAO();
+
+        todos = todoDAO.RetrieveAll();
+    }
+
+    private void CreateTodo()
+    {  
+
+        if (!string.IsNullOrEmpty(todoTitle) && !string.IsNullOrEmpty(todoDetails))
+        {
+            TodoDAO todoDAO = new TodoDAO();
+            Todo todo = new Todo();
+
+            todo.title = todoTitle;
+            todo.details = todoDetails;
+            todoDAO.Create(todo);
+
+            todos = todoDAO.RetrieveAll();
+        }
+    }
+
+    private void DeleteTodo(int todoId)
+    {
+        TodoDAO todoDAO = new TodoDAO();
+
+        todoDAO.Delete(todoId);
+
+        todos = todoDAO.RetrieveAll();
+    }
+
+    private void UpdateTodo(Todo todo)
+    {
+        TodoDAO todoDAO = new TodoDAO();
+
+        todoDAO.Update(todo);
+
+        todos = todoDAO.RetrieveAll();
+    }
+}
